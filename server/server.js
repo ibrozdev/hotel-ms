@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routers/authRoutes.js';
@@ -10,6 +11,7 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT | 5000;
 app.use(express.json());
+app.use(morgan('combined'));
 
 app.use('/api/auth',authRoutes);
 
