@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routers/authRoutes.js';
+import userRoutes from './routers/routes.js';
 dotenv.config();
 
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(morgan('combined'));
 
 app.use('/api/auth',authRoutes);
+app.use('/api/users',userRoutes);
 
 
 
