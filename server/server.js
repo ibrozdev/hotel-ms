@@ -1,32 +1,40 @@
-import express from 'express';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import authRoutes from './routers/authRoutes.js';
-import userRoutes from './routers/routes.js';
+import express from "express";
+import morgan from "morgan";
+import dotenv from "dotenv";
+
+import connectDB from "./config/db.js";
+import authRoutes from "./routers/authRoutes.js";
+import userRoutes from "./routers/routes.js";
+import serviceRoutes from "./routers/serviceRoutes.js";
+
+
+// Load env variables FIRST
 dotenv.config();
 
-
+// Connect to MongoDB
 connectDB();
 
 const app = express();
-const PORT = process.env.PORT | 5000;
+
+// Middleware
 app.use(express.json());
-app.use(morgan('combined'));
+app.use(morgan("dev"));
 
-app.use('/api/auth',authRoutes);
-app.use('/api/users',userRoutes);
-
-
-
-
-app.get('/',(req,res)=>{
-    res.send('hello from hotel ms');
-})
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/services", serviceRoutes);
 
 
+// Test route
+app.get("/", (req, res) => {
+  res.send("Hello from Hotel MS API 🚀");
+});
 
+// Port
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT,(req,res)=>{
-    console.log(`server is running on this url http://localhost:${PORT}`);
-})
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
