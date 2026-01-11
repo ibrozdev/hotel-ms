@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routers/authRoutes.js';
+import userRoute from './routers/routes.js'
+import serviceRoute from './routers/serviceRoutes.js';
 import bookingRoutes from './routers/bookingRouter.js';
 dotenv.config();
 
@@ -14,6 +16,8 @@ const app = express();
 app.use(express.json());
 
 app.use('/api/auth',authRoutes);
+app.use('/api/users',userRoute);
+app.use("/api/services", serviceRoute);
 app.use('/api/booking',bookingRoutes);
 
 
