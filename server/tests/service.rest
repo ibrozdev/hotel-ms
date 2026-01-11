@@ -1,0 +1,47 @@
+### Variables
+@baseUrl = http://localhost:5000/api/services
+@serviceId = 696399aff23a0c2a0b95c9a6
+
+### 1. Create a New Service (Room)
+POST {{baseUrl}}/create
+Content-Type: application/json
+
+{
+    "serviceName": "Luxe King Suite 101",
+    "category": "Room",
+    "type": "Penthouse",
+    "price": 250,
+    "description": "High-end luxury suite with a city view and premium amenities.",
+    "isAvailable": true
+}
+
+### 2. Create a New Service (Office)
+POST {{baseUrl}}/create
+Content-Type: application/json
+
+{
+    "serviceName": "Private Office B4",
+    "category": "Office",
+    "type": "Workspace",
+    "price": 50,
+    "description": "Quiet, fully-equipped private office for optimal productivity.",
+    "isAvailable": true
+}
+
+### 3. Get All Services
+GET {{baseUrl}}/getservice
+
+### 4. Get Single Service by ID
+GET {{baseUrl}}/getservice/{{serviceId}}
+
+### 5. Update a Service
+PUT {{baseUrl}}/update/{{serviceId}}
+Content-Type: application/json
+
+{
+    "price": 275,
+    "isAvailable": false
+}
+
+### 6. Delete a Service
+DELETE {{baseUrl}}/delete/{{serviceId}}

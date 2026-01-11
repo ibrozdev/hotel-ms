@@ -1,35 +1,27 @@
 import Service from "../models/service.js";
 
-/**
- * @desc   
- * @route  
- */
+
 export const createService = async (req, res) => {
     try {
+
         const service = await Service.create(req.body);
-        res.status(201).json(service);
+        res.status(201).json({success:true,  message: "Service created successfully", data: service });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-/**
- * @desc    
- * @route   
- */
+
 export const getAllServices = async (req, res) => {
     try {
         const services = await Service.find();
-        res.status(200).json(services);
+        res.status(200).json({success:true, count:services.length, data: services});
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-/**
- * @desc    
- * @route   
- */
+
 export const getServiceById = async (req, res) => {
     try {
         const service = await Service.findById(req.params.id);
@@ -42,14 +34,15 @@ export const getServiceById = async (req, res) => {
     }
 };
 
-/**
- * @desc    
- * @route   
- */
+
 export const updateService = async (req, res) => {
     try {
+        const serviceId = req.params.id;
+        if (!serviceId){
+            return res.status(400).json({ message: "Service ID is required" });
+        }
         const service = await Service.findByIdAndUpdate(
-            req.params.id,
+            serviceId,
             req.body,
             { new: true, runValidators: true }
         );
@@ -58,16 +51,13 @@ export const updateService = async (req, res) => {
             return res.status(404).json({ message: "Service not found" });
         }
 
-        res.status(200).json(service);
+        res.status(200).json({success:true, data: service});
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-/**
- * @desc    Delete service
- * @route   DELETE /api/services/:id
- */
+
 export const deleteService = async (req, res) => {
     try {
         const service = await Service.findByIdAndDelete(req.params.id);
