@@ -1,0 +1,37 @@
+### Variables
+@baseUrl = http://localhost:5000/api/booking
+@userId = 695e8f6e186dfcd019a4b938
+@serviceId = 696399cff23a0c2a0b95c9a8
+@bookingId = REPLACE_AFTER_CREATION
+
+### 1. Create a New Booking
+# Tests date validation and relationship mapping
+POST {{baseUrl}}/create
+Content-Type: application/json
+
+{
+    "user": "{{userId}}",
+    "service": "{{serviceId}}",
+    "checkInDate": "2024-05-10",
+    "checkOutDate": "2024-05-15",
+    "status": "pending"
+}
+
+### 2. Get All Bookings (Tests .populate())
+GET {{baseUrl}}/getbooking
+
+### 3. Get Booking By ID
+GET {{baseUrl}}/getbooking/{{bookingId}}
+
+### 4. Update Booking Dates or Status
+PUT {{baseUrl}}/update/{{bookingId}}
+Content-Type: application/json
+
+{
+    "status": "confirmed",
+    "checkInDate": "2024-05-11",
+    "checkOutDate": "2024-05-16"
+}
+
+### 5. Delete Booking
+DELETE {{baseUrl}}/delete/{{bookingId}}

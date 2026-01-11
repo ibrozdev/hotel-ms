@@ -1,0 +1,54 @@
+### Variables
+@baseUrl = http://localhost:5000/api
+@contentType = application/json
+
+##############################################
+# 1. REGISTER A NEW USER
+# Run this first to create data in your MongoDB
+##############################################
+# @name register
+POST {{baseUrl}}/users/register
+Content-Type: {{contentType}}
+
+{
+    "name": "Test User",
+    "email": "test@gmail.com",
+    "password": "password123",
+    "role": "customer"
+}
+
+###
+
+##############################################
+# 2. GET ALL USERS
+##############################################
+GET {{baseUrl}}/users/getUsers
+
+###
+
+##############################################
+# 3. GET USER BY ID
+# Copy an "_id" from the response of "GET ALL USERS" and paste it below
+##############################################
+@userId = 677fdd1923e8003f0ec68916
+GET {{baseUrl}}/users/getUsers/{{userId}}
+
+###
+
+##############################################
+# 4. UPDATE USER
+##############################################
+PUT {{baseUrl}}/users/updateUser/{{userId}}
+Content-Type: {{contentType}}
+
+{
+    "name": "Updated Testing Name",
+    "role": "manager"
+}
+
+###
+
+##############################################
+# 5. DELETE USER
+##############################################
+DELETE {{baseUrl}}/users/deleteUser/{{userId}}

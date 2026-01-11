@@ -10,10 +10,10 @@ import {
 
 const bookingRoutes = express.Router();
 
-bookingRoutes.post("/", createBooking);
-bookingRoutes.get("/", getAllBookings);
-bookingRoutes.get("/:id", getBookingById);
-bookingRoutes.put("/:id", updateBooking);
-bookingRoutes.delete("/:id", deleteBooking);
+bookingRoutes.post("/create", createBooking);
+bookingRoutes.get("/getbooking", getAllBookings);
+bookingRoutes.get("/getbooking/:id", getBookingById);
+bookingRoutes.put("/update/:id", updateBooking);
+bookingRoutes.delete("/delete/:id", deleteBooking);
 
 export default bookingRoutes;
