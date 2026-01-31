@@ -8,6 +8,9 @@ const serviceSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    image: {
+      type: String,
+    },
     category: {
       type: String,
       required: [true, "Fadlan dooro qaybta (category)"],
