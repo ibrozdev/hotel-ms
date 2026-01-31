@@ -1,73 +1,62 @@
 import Service from "../models/service.js";
+import asyncHandler from "express-async-handler";
 
+// @desc Create New Service
+export const createService = asyncHandler(async (req, res) => {
+  const service = await Service.create(req.body);
+  res.status(201).json({
+    success: true,
+    message: "Service created successfully",
+    data: service,
+  });
+});
 
-export const createService = async (req, res) => {
-    try {
+// @desc Get All Services
+export const getAllServices = asyncHandler(async (req, res) => {
+  const services = await Service.find();
+  res.status(200).json({
+    success: true,
+    count: services.length,
+    data: services,
+  });
+});
 
-        const service = await Service.create(req.body);
-        res.status(201).json({success:true,  message: "Service created successfully", data: service });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+// @desc Get Service By ID
+export const getServiceById = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  if (!service) {
+    res.status(404);
+    throw new Error("Adeeggan (Service) lama helin");
+  }
+  res.status(200).json({ success: true, data: service });
+});
 
+// @desc Update Service
+export const updateService = asyncHandler(async (req, res) => {
+  const service = await Service.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-export const getAllServices = async (req, res) => {
-    try {
-        const services = await Service.find();
-        res.status(200).json({success:true, count:services.length, data: services});
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+  if (!service) {
+    res.status(404);
+    throw new Error("Adeeggan lama helin, laguma sameyn karo update");
+  }
 
+  res.status(200).json({ success: true, data: service });
+});
 
-export const getServiceById = async (req, res) => {
-    try {
-        const service = await Service.findById(req.params.id);
-        if (!service) {
-            return res.status(404).json({ message: "Service not found" });
-        }
-        res.status(200).json(service);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+// @desc Delete Service
+export const deleteService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
 
+  if (!service) {
+    res.status(404);
+    throw new Error("Adeeggan lama helin, lama tirtiri karo");
+  }
 
-export const updateService = async (req, res) => {
-    try {
-        const serviceId = req.params.id;
-        if (!serviceId){
-            return res.status(400).json({ message: "Service ID is required" });
-        }
-        const service = await Service.findByIdAndUpdate(
-            serviceId,
-            req.body,
-            { new: true, runValidators: true }
-        );
-
-        if (!service) {
-            return res.status(404).json({ message: "Service not found" });
-        }
-
-        res.status(200).json({success:true, data: service});
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-
-export const deleteService = async (req, res) => {
-    try {
-        const service = await Service.findByIdAndDelete(req.params.id);
-
-        if (!service) {
-            return res.status(404).json({ message: "Service not found" });
-        }
-
-        res.status(200).json({ message: "Service deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+  await service.deleteOne();
+  res
+    .status(200)
+    .json({ success: true, message: "Service deleted successfully" });
+});

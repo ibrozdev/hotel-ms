@@ -1,5 +1,5 @@
 import  exprss from 'express';
-import { deleteUser, getAllUsers, getUserById, registerUser, updateUser } from '../controllers/controller.js';
+import { deleteUser, getAllUsers, getUserById, registerUser, updateUser } from '../controllers/authController.js';
 const route = exprss.Router();
 
 route.post('/register',registerUser);

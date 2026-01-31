@@ -1,72 +1,45 @@
-### Variables
+### Variables 
 @baseUrl = http://localhost:5000/api
-@contentType = application/json
+@adminToken = Halkan_Geli_Token_ka_Admin_ka
+@userId = 69613d9ab99a450c9b8aed1a
 
-##############################################
-# 1. REGISTER AN ADMIN
-##############################################
-POST {{baseUrl}}/auth/register
-Content-Type: {{contentType}}
+### 1. REGISTER ADMIN (Tijaabada koowaad)
+POST {{baseUrl}}/users/register
+Content-Type: application/json
 
 {
-    "name": "Ibrahim",
-    "email": "ibra@gmail.com",
-    "phone":"+45678788787",
-    "password": "password123",
+    "name": "Admin Ibra",
+    "email": "admin@gmail.com",
+    "password": "Password123",
     "role": "admin"
 }
 
-###
-
-##############################################
-# 2. REGISTER A MANAGER
-##############################################
-POST {{baseUrl}}/auth/register
-Content-Type: {{contentType}}
-
-{
-    "name": "Service Manager",
-    "email": "manager@gmail.com",
-    "phone":"45678788787",
-    "password": "password123",
-    "role": "manager"
-}
-
-###
-
-##############################################
-# 3. REGISTER A CUSTOMER
-##############################################
-POST {{baseUrl}}/auth/register
-Content-Type: {{contentType}}
-
-{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123",
-    "role": "customer"
-}
-
-###
-
-##############################################
-# 4. LOGIN (CAPTURES TOKEN AUTOMATICALLY)
-##############################################
-# @name login
+### 2. LOGIN (Si aad u hesho Token-ka)
+# @name loginRequest
 POST {{baseUrl}}/auth/login
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
-    "email": "ibra@gmail.com",
-    "password": "password123"
+    "email": "admin@gmail.com",
+    "password": "Password123"
 }
 
-###
+### 3. GET ALL USERS (Cadaynta Amniga)
+# Tijaabi inuu soo celiyo dhammaan dadka
+GET {{baseUrl}}/users/getUsers
+Authorization: Bearer {{adminToken}}
 
-##############################################
-# 5. TEST PROTECTED ROUTE (Using the Login Token)
-##############################################
-@authToken = {{login.response.body.token}}
+### 4. UPDATE USER (Tijaabada Model Hook-ga)
+# Waxaan tijaabinaynaa inuu password-ka cusub hash gareeyo
+PUT {{baseUrl}}/users/updateUser/{{userId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
 
-GET {{baseUrl}}/services
-Authorization: Bearer {{authToken}}
+{
+    "email": "test@gmail.com",
+    "password": "Password123"
+}
+
+### 5. DELETE USER (Tijaabada ugu dambaysa)
+DELETE {{baseUrl}}/users/deleteUser/{{userId}}
+Authorization: Bearer {{adminToken}}

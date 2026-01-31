@@ -1,47 +1,54 @@
-### Variables
-@baseUrl = http://localhost:5000/api/services
-@serviceId = 696399aff23a0c2a0b95c9a6
+### Variables 
+@baseUrl = http://localhost:5000/api
+@serviceID = 696399cff23a0c2a0b95c9a8
 
-### 1. Create a New Service (Room)
-POST {{baseUrl}}/create
+
+###  login to get  token 
+
+# @name login
+
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "serviceName": "Luxe King Suite 101",
+    "email": "admin@gmail.com",
+    "password": "Password123"
+}
+###
+@authToken = {{login.response.body.user.token}}
+
+
+### 1. CREATE SERVICE (Kaliya Admin)
+POST {{baseUrl}}/services/create
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+    "serviceName": "Luxury Suite 101",
     "category": "Room",
-    "type": "Penthouse",
-    "price": 250,
-    "description": "High-end luxury suite with a city view and premium amenities.",
-    "isAvailable": true
+    "type": "King Size",
+    "price": 150,
+    "description": "A beautiful luxury room with a sea view and free breakfast."
 }
 
-### 2. Create a New Service (Office)
-POST {{baseUrl}}/create
+### 2. GET ALL SERVICES (Login User)
+GET {{baseUrl}}/services/getservice
+Authorization: Bearer {{authToken}}
+
+### 3. GET SINGLE SERVICE
+GET {{baseUrl}}/services/getservice/{{serviceID}}
+Authorization: Bearer {{authToken}}
+
+### 4. UPDATE SERVICE (Admin Kaliya)
+PUT {{baseUrl}}/services/update/{{serviceID}}
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
-    "serviceName": "Private Office B4",
-    "category": "Office",
-    "type": "Workspace",
-    "price": 50,
-    "description": "Quiet, fully-equipped private office for optimal productivity.",
-    "isAvailable": true
-}
-
-### 3. Get All Services
-GET {{baseUrl}}/getservice
-
-### 4. Get Single Service by ID
-GET {{baseUrl}}/getservice/{{serviceId}}
-
-### 5. Update a Service
-PUT {{baseUrl}}/update/{{serviceId}}
-Content-Type: application/json
-
-{
-    "price": 275,
+    "price": 175,
     "isAvailable": false
 }
 
-### 6. Delete a Service
-DELETE {{baseUrl}}/delete/{{serviceId}}
+### 5. DELETE SERVICE (Admin Kaliya)
+DELETE {{baseUrl}}/services/delete/{{serviceID}}
+Authorization: Bearer {{authToken}}

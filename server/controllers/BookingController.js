@@ -1,146 +1,91 @@
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
-import Service from "../models/Service.js";
+import Service from "../models/service.js";
+import asyncHandler from "express-async-handler";
 
+// @desc Create New Booking
+export const createBooking = asyncHandler(async (req, res) => {
+  const { user, service, checkInDate, checkOutDate, status } = req.body;
 
-export const createBooking = async (req, res) => {
-  try {
-    const { user, service, checkInDate, checkOutDate, status } = req.body;
-
-    // 1. Validate user
-    const existingUser = await User.findById(user);
-    if (!existingUser) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    // 2. Validate service (Room/Office/Hall)
-    const existingService = await Service.findById(service);
-    if (!existingService) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Service not found" });
-    }
-
-    // 3. Validate and parse dates
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-
-    if (checkOut <= checkIn) {
-      return res.status(400).json({
-        success: false,
-        message: "Check-out date must be after check-in date",
-      });
-    }
-
-    // 4. Calculate Total Price
-    // Difference in milliseconds / (ms * sec * min * hours)
-    const diffTime = Math.abs(checkOut - checkIn);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const calculatedPrice = diffDays * existingService.price;
-
-    // 5. Create booking
-    const booking = await Booking.create({
-      user,
-      service,
-      checkInDate: checkIn,
-      checkOutDate: checkOut,
-      totalPrice: calculatedPrice, // Now defined
-      status: status || "confirmed",
-    });
-
-    // 6. Update service availability status
-    existingService.isAvailable = false;
-    await existingService.save();
-
-    return res.status(201).json({
-      success: true,
-      message: "Booking created successfully",
-      data: booking,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Server error while creating booking",
-      error: error.message,
-    });
+  // 1. Hubi in Service-ka uu jiro iyo inuu banaan yahay
+  const existingService = await Service.findById(service);
+  if (!existingService) {
+    res.status(404);
+    throw new Error("Adeeggan lama helin");
   }
-};
 
-
-export const getAllBookings = async (req, res) => {
-  try {
-    const bookings = await Booking.find()
-      .populate("user", "name email") // Matches your User model fields
-      .populate("service", "serviceName price category"); // Matches Service model
-
-    res.status(200).json({ success: true, count: bookings.length, data: bookings });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+  if (!existingService.isAvailable) {
+    res.status(400);
+    throw new Error("Adeeggan (Qolka/Hoolka) horay ayaa loo qabsaday!");
   }
-};
 
-export const getBookingById = async (req,res)=>{
-  try {
-
-    
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+  // 2. Hubi Taariikhda
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+  if (checkOut <= checkIn) {
+    res.status(400);
+    throw new Error("Check-out waa inuu ka dambeeyaa Check-in");
   }
-} 
 
+  // 3. Xisaabi totalPrice
+  const diffTime = Math.abs(checkOut - checkIn);
+  console.log("how many time",diffTime);
+  
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  console.log("how may days", diffDays.toLocaleString());
+  
+  const calculatedPrice = diffDays * existingService.price;
 
-export const updateBooking = async (req, res) => {
-  try {
-    const { checkInDate, checkOutDate, status } = req.body;
-    const booking = await Booking.findById(req.params.id).populate("service");
+  // 4. Create Booking
+  const booking = await Booking.create({
+    user,
+    service,
+    checkInDate: checkIn,
+    checkOutDate: checkOut,
+    totalPrice: calculatedPrice,
+    status: status || "confirmed",
+  });
 
-    if (!booking) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Booking not found" });
-    }
+  // 5. Update Service Availability
+  existingService.isAvailable = false;
+  await existingService.save();
 
-    // Recalculate price if dates change
-    if (checkInDate && checkOutDate) {
-      const checkIn = new Date(checkInDate);
-      const checkOut = new Date(checkOutDate);
+  res
+    .status(201)
+    .json({ success: true, message: "Booking confirmed", data: booking });
+});
 
-      if (checkOut > checkIn) {
-        const diffTime = Math.abs(checkOut - checkIn);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        booking.totalPrice = diffDays * booking.service.price;
-        booking.checkInDate = checkIn;
-        booking.checkOutDate = checkOut;
-      }
-    }
+// @desc Get All Bookings (Admin Only populated)
+export const getAllBookings = asyncHandler(async (req, res) => {
+  const bookings = await Booking.find()
+    .populate("user", "name email phone")
+    .populate("service", "serviceName price category");
+  res.json({ success: true, count: bookings.length, data: bookings });
+});
 
-    if (status) booking.status = status;
-
-    await booking.save();
-    res.status(200).json({ success: true, message: "Updated", data: booking });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+// @desc Get Single Booking
+export const getBookingById = asyncHandler(async (req, res) => {
+  const booking = await Booking.findById(req.params.id)
+    .populate("user", "name email")
+    .populate("service");
+  if (!booking) {
+    res.status(404);
+    throw new Error("Booking-kan lama helin");
   }
-};
+  res.json({ success: true, data: booking });
+});
 
-
-export const deleteBooking = async (req, res) => {
-  try {
-    const booking = await Booking.findById(req.params.id);
-    if (!booking) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Booking not found" });
-    }
-
-    // Mark the service as available again
-    await Service.findByIdAndUpdate(booking.service, { isAvailable: true });
-
-    await booking.deleteOne();
-    res.status(200).json({ success: true, message: "Booking deleted" });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+// @desc Delete/Cancel Booking
+export const deleteBooking = asyncHandler(async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking) {
+    res.status(404);
+    throw new Error("Booking-kan lama helin");
   }
-};
+
+  // Qolka ka dhig mid banaan (Available)
+  await Service.findByIdAndUpdate(booking.service, { isAvailable: true });
+
+  await booking.deleteOne();
+  res.json({ success: true, message: "Booking cancelled and deleted" });
+});

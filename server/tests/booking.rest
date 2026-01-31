@@ -1,37 +1,54 @@
-### Variables
-@baseUrl = http://localhost:5000/api/booking
-@userId = 695e8f6e186dfcd019a4b938
-@serviceId = 696399cff23a0c2a0b95c9a8
-@bookingId = REPLACE_AFTER_CREATION
+### Variables 
+@baseUrl = http://localhost:5000/api
+@serviceId = 69639a95d9878ddcc752e8e0
+###  login to get  token 
 
-### 1. Create a New Booking
-# Tests date validation and relationship mapping
-POST {{baseUrl}}/create
+# @name login
+
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
+
+{
+    "email": "test@gmail.com",
+    "password": "Password123"
+}
+###
+@authToken = {{login.response.body.user.token}}
+@userId = {{login.response.body.user.id}}
+
+### 1. CREATE BOOKING (User-ku waa inuu Login yahay)
+# Tijaabadani waxay xisaabin doontaa totalPrice waxayna xiri doontaa qolka
+POST {{baseUrl}}/booking/create
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
     "user": "{{userId}}",
     "service": "{{serviceId}}",
-    "checkInDate": "2024-05-10",
-    "checkOutDate": "2024-05-15",
-    "status": "pending"
+    "checkInDate": "2026-02-01",
+    "checkOutDate": "2026-02-05",
+    "status": "confirmed"
 }
 
-### 2. Get All Bookings (Tests .populate())
-GET {{baseUrl}}/getbooking
-
-### 3. Get Booking By ID
-GET {{baseUrl}}/getbooking/{{bookingId}}
-
-### 4. Update Booking Dates or Status
-PUT {{baseUrl}}/update/{{bookingId}}
+### 2. TEST DOUBLE BOOKING (Amniga Logic-ga)
+# Mar kale isku day qolkaas adigoo isticmaalaya xogta kore.
+# Waa inay kuu diidaa: "Adeeggan horay ayaa loo qabsaday!"
+POST {{baseUrl}}/booking/create
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
-    "status": "confirmed",
-    "checkInDate": "2024-05-11",
-    "checkOutDate": "2024-05-16"
+    "user": "{{userId}}",
+    "service": "{{serviceId}}",
+    "checkInDate": "2026-02-10",
+    "checkOutDate": "2026-02-12"
 }
 
-### 5. Delete Booking
-DELETE {{baseUrl}}/delete/{{bookingId}}
+### 3. GET ALL BOOKINGS (Admin Only)
+GET {{baseUrl}}/bookings/getbooking
+Authorization: Bearer {{authToken}}
+
+### 4. DELETE/CANCEL BOOKING
+# Tani waxay tirtiri doontaa booking-ka, qolkana waxay ka dhigi doontaa "Available"
+DELETE {{baseUrl}}/bookings/delete/{{bookingId}}
+Authorization: Bearer {{authToken}}

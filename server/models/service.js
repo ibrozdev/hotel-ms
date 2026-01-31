@@ -2,20 +2,24 @@ import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema(
   {
-    serviceName: { type: String, required: true, unique: true },
+    serviceName: {
+      type: String,
+      required: [true, "Fadlan geli magaca adeegga"],
+      unique: true,
+      trim: true,
+    },
     category: {
       type: String,
-      required: true,
+      required: [true, "Fadlan dooro qaybta (category)"],
       enum: ["Room", "Hall", "Office"],
-      required: true,
     },
     type: {
       type: String,
-      required: true,
+      required: [true, "Fadlan geli nooca (e.g. Luxury, Standard)"],
     },
     price: {
       type: Number,
-      required: true,
+      required: [true, "Fadlan geli qiimaha"],
     },
     isAvailable: {
       type: Boolean,
@@ -23,10 +27,10 @@ const serviceSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      required: [true, "Fadlan geli sharaxaadda adeegga"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Service =

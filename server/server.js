@@ -5,12 +5,23 @@ import authRoutes from './routers/authRoutes.js';
 import userRoute from './routers/routes.js'
 import serviceRoute from './routers/serviceRoutes.js';
 import bookingRoutes from './routers/bookingRouter.js';
+import { errorHandler } from './middlewares/errorMiddleware.js';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import cors from 'cors';
 dotenv.config();
+const app = express();
+
+// Middleware for security headers
+app.use(helmet());
+
+
+
+app.use(cors());
 
 // Connect to MongoDB
 connectDB();
 
-const app = express();
 
 // Middleware
 app.use(express.json());
@@ -21,6 +32,7 @@ app.use("/api/services", serviceRoute);
 app.use('/api/booking',bookingRoutes);
 
 
+app.use(errorHandler);
 
 
 
