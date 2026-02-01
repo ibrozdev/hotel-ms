@@ -89,3 +89,25 @@ export const deleteBooking = asyncHandler(async (req, res) => {
   await booking.deleteOne();
   res.json({ success: true, message: "Booking cancelled and deleted" });
 });
+
+
+export const getRevenueStats = asyncHandler(async (req, res) => {
+  const stats = await Booking.aggregate([
+    {
+      $match: { status: "confirmed" }, // Kaliya kuwa la bixiyay/la xaqiijiyay
+    },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: "$totalPrice" },
+        totalBookings: { $sum: 1 },
+        avgPrice: { $avg: "$totalPrice" },
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: stats.length > 0 ? stats[0] : { totalRevenue: 0, totalBookings: 0 },
+  });
+});

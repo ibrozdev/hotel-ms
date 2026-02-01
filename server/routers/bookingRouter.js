@@ -4,6 +4,7 @@ import {
   getAllBookings,
   getBookingById,
   deleteBooking,
+  getRevenueStats
 } from "../controllers/BookingController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 
@@ -19,4 +20,5 @@ router.get(
 router.get("/getbooking/:id", protect, getBookingById);
 router.delete("/delete/:id", protect, deleteBooking);
 
+router.get("/stats", protect, authorize("admin"), getRevenueStats);
 export default router;

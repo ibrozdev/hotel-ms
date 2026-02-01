@@ -1,6 +1,7 @@
 import Service from "../models/service.js";
 import { superbase,BUCKET_NAME } from "../config/supabase.js";
 import asyncHandler from "express-async-handler";
+import { json } from "express";
 
 // @desc Create New Service
 export const createService = asyncHandler(async (req, res) => {
@@ -34,7 +35,24 @@ export const createService = asyncHandler(async (req, res) => {
 });
 
 export const getAllServices = asyncHandler(async (req, res) => {
-  const services = await Service.find();
+  const queryObj = { ...req.query };
+
+  const excludeFields = ["page", "sort", "limit", ];
+  excludeFields.forEach(el => delete queryObj[el]);
+
+
+  let queryStr = JSON.stringify(queryObj);
+
+  queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+  // searching by name 
+
+  let finalQuery = JSON.parse(queryStr);
+  if ( req.query.search){
+    finalQuery.serviceName = { $regex: req.query.search, $options: "i" };
+  }
+  const services = await Service.find(finalQuery);
+  
   res.status(200).json({
     success: true,
     count: services.length,
