@@ -1,7 +1,8 @@
 ### Variables 
 @baseUrl = http://localhost:5000/api
 @serviceId = 69639a95d9878ddcc752e8e0
-###  login to get  token 
+@bookingId = 6963a4a4823dbaf6b65baca8
+###  login user get  token 
 
 # @name login
 
@@ -9,7 +10,18 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "test@gmail.com",
+    "email": "admin@gmail.com",
+    "password": "Password123"
+}
+
+###  login admin get  token 
+
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "ibra@gmail.com",
     "password": "Password123"
 }
 ###
@@ -45,10 +57,16 @@ Authorization: Bearer {{authToken}}
 }
 
 ### 3. GET ALL BOOKINGS (Admin Only)
-GET {{baseUrl}}/bookings/getbooking
+GET {{baseUrl}}/booking/getbooking
+Authorization: Bearer {{authToken}}
+
+###
+
+### 3. GET  BOOKINGS by id 
+GET {{baseUrl}}/booking/getbooking/{{bookingId}}
 Authorization: Bearer {{authToken}}
 
 ### 4. DELETE/CANCEL BOOKING
 # Tani waxay tirtiri doontaa booking-ka, qolkana waxay ka dhigi doontaa "Available"
-DELETE {{baseUrl}}/bookings/delete/{{bookingId}}
+DELETE {{baseUrl}}/booking/delete/{{bookingId}}
 Authorization: Bearer {{authToken}}

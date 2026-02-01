@@ -5,7 +5,7 @@ import asyncHandler from "express-async-handler";
 
 // @desc Create New Booking
 export const createBooking = asyncHandler(async (req, res) => {
-  const { user, service, checkInDate, checkOutDate, status } = req.body;
+  const { service, checkInDate, checkOutDate, status } = req.body;
 
   // 1. Hubi in Service-ka uu jiro iyo inuu banaan yahay
   const existingService = await Service.findById(service);
@@ -29,16 +29,12 @@ export const createBooking = asyncHandler(async (req, res) => {
 
   // 3. Xisaabi totalPrice
   const diffTime = Math.abs(checkOut - checkIn);
-  console.log("how many time",diffTime);
-  
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  console.log("how may days", diffDays.toLocaleString());
-  
   const calculatedPrice = diffDays * existingService.price;
 
-  // 4. Create Booking
+  // 4. Create Booking (User-ka waxaa laga qaadayaa req.user oo ah qofka login-ka ah)
   const booking = await Booking.create({
-    user,
+    user: req.user._id,
     service,
     checkInDate: checkIn,
     checkOutDate: checkOut,
@@ -55,7 +51,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     .json({ success: true, message: "Booking confirmed", data: booking });
 });
 
-// @desc Get All Bookings (Admin Only populated)
+// @desc Get All Bookings (Admin Only)
 export const getAllBookings = asyncHandler(async (req, res) => {
   const bookings = await Booking.find()
     .populate("user", "name email phone")
@@ -68,10 +64,35 @@ export const getBookingById = asyncHandler(async (req, res) => {
   const booking = await Booking.findById(req.params.id)
     .populate("user", "name email")
     .populate("service");
+
   if (!booking) {
     res.status(404);
     throw new Error("Booking-kan lama helin");
   }
+
+  // Helitaanka ID-yada si ammaan ah
+  const bookingUserId =
+    booking.user?._id?.toString() || booking.user?.toString();
+  const currentUserId = req.user?._id?.toString();
+  const isAdmin = req.user.role === "admin";
+
+  // Haddii bookingUserId la waayo (user-kii waa la tirtiray), kaliya Admin baa arki kara
+  if (!bookingUserId) {
+    if (isAdmin) {
+      return res.json({ success: true, data: booking });
+    } else {
+      res.status(403);
+      throw new Error("Booking-kan ma lahan isticmaale ka diiwaangashan");
+    }
+  }
+
+  const isOwner = bookingUserId === currentUserId;
+
+  if (!isOwner && !isAdmin) {
+    res.status(403);
+    throw new Error("Ma oggolid inaad aragto booking-kan, adiga ma lihid");
+  }
+
   res.json({ success: true, data: booking });
 });
 
@@ -90,12 +111,10 @@ export const deleteBooking = asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Booking cancelled and deleted" });
 });
 
-
+// @desc Get Revenue Stats
 export const getRevenueStats = asyncHandler(async (req, res) => {
   const stats = await Booking.aggregate([
-    {
-      $match: { status: "confirmed" }, // Kaliya kuwa la bixiyay/la xaqiijiyay
-    },
+    { $match: { status: "confirmed" } },
     {
       $group: {
         _id: null,

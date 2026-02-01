@@ -1,7 +1,7 @@
 ### Variables 
 @baseUrl = http://localhost:5000/api
 @adminToken = Halkan_Geli_Token_ka_Admin_ka
-@userId = 69613d9ab99a450c9b8aed1a
+@userId = 695e8f6e186dfcd019a4b938
 
 ### 1. REGISTER ADMIN (Tijaabada koowaad)
 POST {{baseUrl}}/users/register
@@ -36,7 +36,7 @@ Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-    "email": "test@gmail.com",
+    "email": "ibra@gmail.com",
     "password": "Password123"
 }
 

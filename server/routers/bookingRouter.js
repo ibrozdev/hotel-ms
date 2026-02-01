@@ -17,7 +17,7 @@ router.get(
   authorize("admin", "manager"),
   getAllBookings,
 );
-router.get("/getbooking/:id", protect, getBookingById);
+router.get("/mybooking/:id", protect, getBookingById);
 router.delete("/delete/:id", protect, deleteBooking);
 
 router.get("/stats", protect, authorize("admin"), getRevenueStats);
