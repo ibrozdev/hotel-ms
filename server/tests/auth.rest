@@ -8,10 +8,9 @@ POST {{baseUrl}}/users/register
 Content-Type: application/json
 
 {
-    "name": "Admin Ibra",
-    "email": "admin@gmail.com",
-    "password": "Password123",
-    "role": "admin"
+    "name": "abdinasir ",
+    "email": "abdi@gmail.com",
+    "password": "Password123"
 }
 
 ### 2. LOGIN (Si aad u hesho Token-ka)

@@ -14,19 +14,30 @@ const serviceSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Fadlan dooro qaybta (category)"],
-      enum: ["Room", "Hall", "Office"],
+      enum: ["Room", "Office", "Hall"],
+    },
+    maxCapacity: {
+      type: Number,
+      required: [true, "Fadlan geli xadiga dadka (capacity)"],
+      default: 2,
+    },
+    amenities: {
+      type: [String],
+      default: [],
     },
     type: {
       type: String,
       required: [true, "Fadlan geli nooca (e.g. Luxury, Standard)"],
+      default: "Standard",
     },
     price: {
       type: Number,
       required: [true, "Fadlan geli qiimaha"],
     },
-    isAvailable: {
-      type: Boolean,
-      default: true,
+    status: {
+      type: String,
+      enum: ["Available", "Booked"],
+      default: "Available",
     },
     description: {
       type: String,

@@ -9,8 +9,11 @@ import { errorHandler } from './middlewares/errorMiddleware.js';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import cors from 'cors';
+import morgan from 'morgan';
 dotenv.config();
 const app = express();
+
+app.use(morgan('dev'));
 
 // Middleware for security headers
 app.use(helmet());

@@ -22,8 +22,8 @@ router.post(
 router.put("/update/:id", protect, authorize("admin"), updateService);
 router.delete("/delete/:id", protect, authorize("admin"), deleteService);
 
-// Routes-ka furan (Qof walba waa arki karaa laakiin waa inuu login yahay si uu u helo liiska)
-router.get("/getservice", protect, getAllServices);
-router.get("/getservice/:id", protect, getServiceById);
+// Routes-ka furan (Qof walba waa arki karaa - No authentication required)
+router.get("/getservice", getAllServices);
+router.get("/getservice/:id", getServiceById);
 
 export default router;

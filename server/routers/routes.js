@@ -1,12 +1,13 @@
 import  exprss from 'express';
 import { deleteUser, getAllUsers, getUserById, registerUser, updateUser } from '../controllers/authController.js';
+import { protect, authorize } from '../middlewares/authMiddleware.js';
 const route = exprss.Router();
 
 route.post('/register',registerUser);
-route.get('/getUsers',getAllUsers);
-route.get('/getUsers/:id',getUserById);
-route.put('/updateUser/:id',updateUser);
-route.delete('/deleteUser/:id',deleteUser);
+route.get('/getUsers', protect, authorize('admin'), getAllUsers);
+route.get('/getUsers/:id', protect, authorize('admin'), getUserById);
+route.put('/updateUser/:id', protect, authorize('admin'), updateUser);
+route.delete('/deleteUser/:id', protect, authorize('admin'), deleteUser);
 
 
 
