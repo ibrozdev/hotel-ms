@@ -48,6 +48,15 @@ class AuthService {
         return user;
       }
     } catch (e) {
+      print("Login Error: $e");
+      if (e is DioException) {
+        if (e.response?.data != null && e.response?.data is Map) {
+          final data = e.response!.data as Map;
+          if (data.containsKey('message')) {
+            throw data['message'];
+          }
+        }
+      }
       rethrow;
     }
     return null;
@@ -93,6 +102,12 @@ class AuthService {
         print(
           "Register DioError: ${e.response?.statusCode} - ${e.response?.data}",
         );
+        if (e.response?.data != null && e.response?.data is Map) {
+          final data = e.response!.data as Map;
+          if (data.containsKey('message')) {
+            throw data['message'];
+          }
+        }
       }
       rethrow;
     }

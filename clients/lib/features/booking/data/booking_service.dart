@@ -41,6 +41,7 @@ class BookingService {
     String serviceId,
     DateTime checkIn,
     DateTime checkOut,
+    String paymentMethod,
   ) async {
     try {
       final response = await _apiClient.dio.post(
@@ -50,13 +51,19 @@ class BookingService {
           "service": serviceId,
           "checkInDate": checkIn.toIso8601String().split('T')[0],
           "checkOutDate": checkOut.toIso8601String().split('T')[0],
+          "paymentMethod": paymentMethod,
         },
       );
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       print("Create Booking Error: $e");
       if (e is DioException) {
-        print("Booking Error Data: ${e.response?.data}");
+        if (e.response?.data != null && e.response?.data is Map) {
+          final data = e.response!.data as Map;
+          if (data.containsKey('message')) {
+            throw data['message']; // Throw the server message
+          }
+        }
       }
       rethrow;
     }

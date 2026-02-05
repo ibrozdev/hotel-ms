@@ -143,21 +143,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               text: 'Login',
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  final success = await authProvider.login(
+                                  final error = await authProvider.login(
                                     _emailController.text,
                                     _passwordController.text,
                                   );
-                                  if (success && mounted) {
-                                    Navigator.pop(context);
-                                  } else if (!success && mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Login failed. Please check your credentials.',
+                                  if (mounted) {
+                                    if (error == null) {
+                                      Navigator.pop(context);
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Login failed: $error'),
+                                          backgroundColor: AppColors.error,
                                         ),
-                                        backgroundColor: AppColors.error,
-                                      ),
-                                    );
+                                      );
+                                    }
                                   }
                                 }
                               },

@@ -14,7 +14,8 @@ import 'customer_dashboard.dart';
 import 'search_results_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
-  const CustomerHomeScreen({super.key});
+  final int initialIndex;
+  const CustomerHomeScreen({super.key, this.initialIndex = 0});
 
   @override
   State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
@@ -32,6 +33,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   @override
   void initState() {
     super.initState();
+    _bottomNavIndex = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ServiceProvider>(context, listen: false).fetchServices();
       Provider.of<BookingProvider>(context, listen: false).fetchMyBookings();

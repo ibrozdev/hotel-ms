@@ -34,11 +34,6 @@ const serviceSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Fadlan geli qiimaha"],
     },
-    status: {
-      type: String,
-      enum: ["Available", "Booked"],
-      default: "Available",
-    },
     description: {
       type: String,
       required: [true, "Fadlan geli sharaxaadda adeegga"],

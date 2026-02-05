@@ -49,11 +49,12 @@ class BookingProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> createBooking(
+  Future<String?> createBooking(
     String userId,
     String serviceId,
     DateTime checkIn,
     DateTime checkOut,
+    String paymentMethod,
   ) async {
     _isLoading = true;
     notifyListeners();
@@ -63,15 +64,20 @@ class BookingProvider extends ChangeNotifier {
         serviceId,
         checkIn,
         checkOut,
+        paymentMethod,
       );
       if (success) {
         // Optionally refresh bookings
-        return true;
+        return null; // Success
       }
-      return false;
+      return "Unknown error occurred";
     } catch (e) {
       debugPrint("Error creating booking: $e");
-      return false;
+      if (e.toString().contains("DioException")) {
+        // We know catch in service rethrows.
+        return e.toString(); // Simplify for now, service should parse data
+      }
+      return e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

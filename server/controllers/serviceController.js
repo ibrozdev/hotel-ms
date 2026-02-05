@@ -1,4 +1,5 @@
 import Service from "../models/service.js";
+import Booking from '../models/Booking.js';
 import { superbase,BUCKET_NAME } from "../config/supabase.js";
 import asyncHandler from "express-async-handler";
 import { json } from "express";
@@ -47,7 +48,7 @@ export const createService = asyncHandler(async (req, res) => {
 export const getAllServices = asyncHandler(async (req, res) => {
   const queryObj = { ...req.query };
 
-  const excludeFields = ["page", "sort", "limit", ];
+  const excludeFields = ["page", "sort", "limit", "checkIn", "checkOut"];
   excludeFields.forEach(el => delete queryObj[el]);
 
 
@@ -55,12 +56,32 @@ export const getAllServices = asyncHandler(async (req, res) => {
 
   queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-  // searching by name 
-
   let finalQuery = JSON.parse(queryStr);
-  if ( req.query.search){
+  
+  // Searching by name 
+  if (req.query.search){
     finalQuery.serviceName = { $regex: req.query.search, $options: "i" };
   }
+
+  // Check Availability
+  const checkInDate = req.query.checkIn ? new Date(req.query.checkIn) : null;
+  const checkOutDate = req.query.checkOut ? new Date(req.query.checkOut) : null;
+
+  if (checkInDate && checkOutDate) {
+      if (!isNaN(checkInDate) && !isNaN(checkOutDate)) {
+         // Find bookings that overlap with requested range
+         const conflictingBookings = await Booking.find({
+            status: { $in: ['confirmed', 'pending'] },
+            $or: [
+               { checkInDate: { $lt: checkOutDate }, checkOutDate: { $gt: checkInDate } }
+            ]
+         });
+
+         const bookedServiceIds = conflictingBookings.map(b => b.service);
+         finalQuery._id = { $nin: bookedServiceIds };
+      }
+  }
+
   const services = await Service.find(finalQuery);
   
   res.status(200).json({

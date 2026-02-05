@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../models/booking_model.dart';
-import 'customer_dashboard.dart';
+import 'customer_home.dart';
 
 class BookingSuccessScreen extends StatelessWidget {
   final Booking booking;
@@ -130,10 +130,11 @@ class BookingSuccessScreen extends StatelessWidget {
           height: 56,
           child: ElevatedButton(
             onPressed: () {
-              // In a real app, this would go to the specific booking details screen
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const CustomerDashboard()),
+                MaterialPageRoute(
+                  builder: (_) => const CustomerHomeScreen(initialIndex: 2),
+                ),
                 (route) => false,
               );
             },
@@ -162,7 +163,9 @@ class BookingSuccessScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const CustomerDashboard()),
+                MaterialPageRoute(
+                  builder: (_) => const CustomerHomeScreen(initialIndex: 0),
+                ),
                 (route) => false,
               );
             },

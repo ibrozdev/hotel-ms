@@ -178,14 +178,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     gradient: AppColors.accentGradient,
                                     onPressed: () async {
                                       if (_formKey.currentState!.validate()) {
-                                        final success = await authProvider
+                                        final error = await authProvider
                                             .register(
                                               _nameController.text,
                                               _emailController.text,
                                               _passwordController.text,
                                             );
                                         if (mounted) {
-                                          if (success) {
+                                          if (error == null) {
                                             Navigator.pop(context);
                                             ScaffoldMessenger.of(
                                               context,
@@ -201,9 +201,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
-                                                  'Registration failed. Please try again.',
+                                                  'Registration failed: $error',
                                                 ),
                                                 backgroundColor:
                                                     AppColors.error,

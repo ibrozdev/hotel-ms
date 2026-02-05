@@ -16,7 +16,11 @@ const app = express();
 app.use(morgan('dev'));
 
 // Middleware for security headers
+// Middleware for security headers
 app.use(helmet());
+
+import { limiter } from './middlewares/rateLimiter.js';
+app.use('/api', limiter);
 
 
 
@@ -31,10 +35,13 @@ app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 
 
+import reviewRoutes from './routers/reviewRoutes.js';
+
 app.use('/api/auth',authRoutes);
 app.use('/api/users',userRoute);
 app.use("/api/services", serviceRoute);
 app.use('/api/booking',bookingRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 
 app.use(errorHandler);

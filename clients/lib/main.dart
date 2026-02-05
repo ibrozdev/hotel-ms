@@ -4,6 +4,7 @@ import 'core/constants/app_theme.dart';
 import 'features/auth/auth_provider.dart';
 import 'features/services/service_provider.dart';
 import 'features/booking/booking_provider.dart';
+import 'features/customer/providers/review_provider.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'package:clients/main_shell.dart';
 
@@ -14,6 +15,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ServiceProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
+        ChangeNotifierProvider(create: (_) => ReviewProvider()),
       ],
       child: const HotelApp(),
     ),

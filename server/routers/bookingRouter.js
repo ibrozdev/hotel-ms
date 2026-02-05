@@ -9,10 +9,11 @@ import {
   deleteBooking
 } from "../controllers/BookingController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
+import { bookingValidation } from "../middlewares/validation.js";
 
 const router = express.Router();
 
-router.post("/create", protect, createBooking);
+router.post("/create", protect, bookingValidation, createBooking);
 router.get(
   "/getbooking",
   protect,

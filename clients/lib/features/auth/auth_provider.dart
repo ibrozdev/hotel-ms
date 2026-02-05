@@ -81,23 +81,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<String?> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
     try {
       _currentUser = await _authService.login(email, password);
       notifyListeners();
-      return true;
+      return null; // Success
     } catch (e) {
       debugPrint("Login error: $e");
-      return false;
+      return e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  Future<String?> register(String name, String email, String password) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -106,10 +106,10 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = user;
       }
       notifyListeners();
-      return true;
+      return null; // Success
     } catch (e) {
       debugPrint("Register error: $e");
-      return false;
+      return e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();

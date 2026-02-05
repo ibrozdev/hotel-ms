@@ -9,6 +9,7 @@ import '../../auth/auth_provider.dart';
 import '../../booking/booking_provider.dart';
 import '../../../../core/network/api_constants.dart';
 import 'select_dates_screen.dart';
+import '../providers/review_provider.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
   final HotelService service;
@@ -23,8 +24,16 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final bookingProvider = Provider.of<BookingProvider>(context);
+    final reviewProvider = Provider.of<ReviewProvider>(context);
     final user = Provider.of<AuthProvider>(context, listen: false).currentUser;
     const Color luxuryBlue = Color(0xFF00008B);
+
+    // Fetch reviews on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (reviewProvider.reviews.isEmpty) {
+        reviewProvider.fetchReviews(widget.service.id);
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -413,7 +422,35 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const _ReviewCard(),
+                    const SizedBox(height: 16),
+                    // Reviews List
+                    if (reviewProvider.isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (reviewProvider.reviews.isEmpty)
+                      const Text("No reviews yet.")
+                    else
+                      ...reviewProvider.reviews.map(
+                        (review) => _ReviewCard(review: review),
+                      ),
+
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _showAddReviewDialog(
+                          context,
+                          reviewProvider,
+                          widget.service.id,
+                        );
+                      },
+                      icon: const Icon(Icons.rate_review),
+                      label: const Text("Write a Review"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: luxuryBlue,
+                        elevation: 0,
+                        side: const BorderSide(color: luxuryBlue),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -478,9 +515,7 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                     child: SizedBox(
                       height: 54,
                       child: ElevatedButton(
-                        onPressed:
-                            (widget.service.status == "Booked" ||
-                                bookingProvider.isLoading)
+                        onPressed: bookingProvider.isLoading
                             ? null
                             : () async {
                                 if (user == null || user.id.isEmpty) {
@@ -522,16 +557,13 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              widget.service.status == "Booked"
-                                  ? "Booked"
-                                  : "Book Now ",
+                              "Book Now ",
                               style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            if (widget.service.status != "Booked")
-                              const Icon(Icons.arrow_forward, size: 18),
+                            const Icon(Icons.arrow_forward, size: 18),
                           ],
                         ),
                       ),
@@ -637,11 +669,13 @@ class _AmenityItem extends StatelessWidget {
 }
 
 class _ReviewCard extends StatelessWidget {
-  const _ReviewCard();
+  final dynamic review;
+  const _ReviewCard({required this.review});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -653,11 +687,10 @@ class _ReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 20,
-                backgroundImage: NetworkImage(
-                  'https://i.pravatar.cc/150?u=sarah',
-                ),
+                backgroundColor: Colors.blue.shade100,
+                child: Text(review['user']['name'][0].toUpperCase()),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -665,11 +698,11 @@ class _ReviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Sarah M.",
+                      review['user']['name'],
                       style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "2 days ago",
+                      "Verified Custommer",
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: Colors.grey,
@@ -681,15 +714,20 @@ class _ReviewCard extends StatelessWidget {
               Row(
                 children: List.generate(
                   5,
-                  (index) =>
-                      const Icon(Icons.star, color: Colors.orange, size: 16),
+                  (index) => Icon(
+                    index < (review['rating'] ?? 0)
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: Colors.orange,
+                    size: 16,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            "\"Absolutely stunning views and the service was impeccable. The workspace was perfect for my remote meetings.\"",
+            review['comment'],
             style: GoogleFonts.inter(
               fontSize: 14,
               color: Colors.grey[600],
@@ -700,4 +738,69 @@ class _ReviewCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showAddReviewDialog(
+  BuildContext context,
+  ReviewProvider provider,
+  String serviceId,
+) {
+  final commentController = TextEditingController();
+  double rating = 5.0;
+
+  showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) => AlertDialog(
+        title: const Text("Write a Review"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                return IconButton(
+                  icon: Icon(
+                    index < rating ? Icons.star : Icons.star_border,
+                    color: Colors.orange,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      rating = index + 1.0;
+                    });
+                  },
+                );
+              }),
+            ),
+            TextField(
+              controller: commentController,
+              decoration: const InputDecoration(
+                hintText: "Share your experience...",
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (commentController.text.isEmpty) return;
+              Navigator.pop(context);
+              await provider.addReview(
+                serviceId,
+                rating,
+                commentController.text,
+              );
+            },
+            child: const Text("Submit"),
+          ),
+        ],
+      ),
+    ),
+  );
 }

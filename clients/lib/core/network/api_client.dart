@@ -56,6 +56,7 @@ class ApiClient {
           // Handle global errors (e.g. 401 Unauthorized -> Logout)
           if (e.response?.statusCode == 401) {
             // TODO: Trigger logout logic
+            
           }
           return handler.next(e);
         },

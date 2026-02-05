@@ -5,34 +5,57 @@ import asyncHandler from "express-async-handler";
 
 // @desc Create New Booking
 export const createBooking = asyncHandler(async (req, res) => {
-  const { service, checkInDate, checkOutDate, status } = req.body;
+  const { service, checkInDate, checkOutDate, paymentMethod } = req.body; // paymentMethod: 'Card' | 'PayAtHotel'
 
-  // 1. Hubi in Service-ka uu jiro iyo inuu banaan yahay
+  // 1. Hubi in Service-ka uu jiro
   const existingService = await Service.findById(service);
   if (!existingService) {
     res.status(404);
     throw new Error("Adeeggan lama helin");
   }
 
-  if (existingService.status !== "Available") {
-    res.status(400);
-    throw new Error("Adeeggan (Qolka/Hoolka) horay ayaa loo qabsaday!");
-  }
-
   // 2. Hubi Taariikhda
   const checkIn = new Date(checkInDate);
   const checkOut = new Date(checkOutDate);
+  
+  if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+     res.status(400);
+     throw new Error("Taariikhda la galiyay sax ma ahan");
+  }
+
   if (checkOut <= checkIn) {
     res.status(400);
     throw new Error("Check-out waa inuu ka dambeeyaa Check-in");
   }
 
-  // 3. Xisaabi totalPrice
+  // 3. Check Availability (Dynamic Date Range Check)
+  // Find any confirmed booking for this service that overlaps with requested dates
+  const conflictingBooking = await Booking.findOne({
+    service: service,
+    status: { $in: ["confirmed", "pending"] }, // Check confirmed or pending bookings
+    $or: [
+      {
+        // Requested Start is between existing booking
+        checkInDate: { $lt: checkOut },
+        checkOutDate: { $gt: checkIn }
+      }
+    ]
+  });
+
+  if (conflictingBooking) {
+    res.status(400);
+    throw new Error("Waan ka xunnahay, waqtigan adeeggan waa la bandhigay (Booked). Fadlan dooro waqti kale.");
+  }
+
+  // 4. Xisaabi totalPrice
   const diffTime = Math.abs(checkOut - checkIn);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const calculatedPrice = diffDays * existingService.price;
+  // Ensure at least 1 day charge even if same day checkout (hotel logic usually daily) 
+  // or logic can differ if it's hourly. Assuming daily for now.
+  const billingDays = diffDays === 0 ? 1 : diffDays; 
+  const calculatedPrice = billingDays * existingService.price;
 
-  // 4. Generate Unique Booking ID
+  // 5. Generate Unique Booking ID
   let bookingId;
   let isUnique = false;
   while (!isUnique) {
@@ -41,19 +64,33 @@ export const createBooking = asyncHandler(async (req, res) => {
     if (!existingBooking) isUnique = true;
   }
 
-  // 5. Create Booking (User-ka waxaa laga qaadayaa req.user oo ah qofka login-ka ah)
+  // 6. Payment Status Logic
+  let bookingStatus = "confirmed";
+  let paymentStatus = "Pending";
+
+  if (paymentMethod === "PayAtHotel") {
+      paymentStatus = "Pending";
+  } else if (paymentMethod === "Card") {
+      // Logic for "Simulated Card Payment"
+      paymentStatus = "Paid";
+  }
+
+  // 7. Create Booking
   const booking = await Booking.create({
-    user: req.user.id || req.user._id, // Support both
+    user: req.user.id || req.user._id,
     service,
     bookingId: bookingId,
     checkInDate: checkIn,
     checkOutDate: checkOut,
     totalPrice: calculatedPrice,
-    status: status || "confirmed",
+    status: bookingStatus,
+    paymentMethod,
+    paymentStatus,
+    // Add payment info if schema supports it, otherwise implied by status/method
+    // For now we rely on status.
   });
 
-  // 5. Update Service Status
-  await Service.findByIdAndUpdate(service, { status: "Booked" });
+  // Note: We DO NOT update Service.status to 'Booked' anymore.
 
   res
     .status(201)

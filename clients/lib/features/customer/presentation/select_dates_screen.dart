@@ -7,7 +7,7 @@ import '../../../../models/service_model.dart';
 import '../../../../core/network/api_constants.dart';
 import '../../booking/booking_provider.dart';
 import '../../auth/auth_provider.dart';
-import 'booking_success_screen.dart';
+import '../../booking/presentation/booking_confirmation_screen.dart';
 
 class SelectDatesScreen extends StatefulWidget {
   final HotelService service;
@@ -325,27 +325,18 @@ class _SelectDatesScreenState extends State<SelectDatesScreen> {
                 onPressed: (nights == 0 || provider.isLoading)
                     ? null
                     : () async {
-                        final success = await provider.createBooking(
-                          user!.id,
-                          widget.service.id,
-                          _rangeStart!,
-                          _rangeEnd!,
-                        );
-
-                        if (mounted && success) {
-                          // Getting the last booking which should be the one just created
-                          // In a real app, the API should return the booking object with the ID
-                          await provider.fetchMyBookings();
-                          final newBooking = provider.myBookings.first;
-
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  BookingSuccessScreen(booking: newBooking),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BookingConfirmationScreen(
+                              service: widget.service,
+                              checkIn: _rangeStart!,
+                              checkOut: _rangeEnd!,
+                              nights: nights,
+                              totalPrice: totalPrice,
                             ),
-                          );
-                        }
+                          ),
+                        );
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: luxuryBlue,

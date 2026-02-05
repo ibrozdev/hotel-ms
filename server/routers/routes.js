@@ -1,9 +1,10 @@
-import  exprss from 'express';
-import { deleteUser, getAllUsers, getUserById, registerUser, updateUser } from '../controllers/authController.js';
+import express from 'express';
+import { deleteUser, getAllUsers, getUserById, updateUser } from '../controllers/authController.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js';
-const route = exprss.Router();
+const route = express.Router();
 
-route.post('/register',registerUser);
+
+
 route.get('/getUsers', protect, authorize('admin'), getAllUsers);
 route.get('/getUsers/:id', protect, authorize('admin'), getUserById);
 route.put('/updateUser/:id', protect, authorize('admin'), updateUser);
