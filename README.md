@@ -24,7 +24,7 @@ A comprehensive Hotel Management System built with a modern **Flutter** frontend
 
 Before you begin, ensure you have the following installed:
 - **Node.js** (v14 or higher) & **npm**
-- **Flutter SDK** (Latest Stable)
+- **Flutter SDK** (Latest Stable)`
 - **MongoDB** (Local instance or MongoDB Atlas Connection String)
 
 ---
